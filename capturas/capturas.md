@@ -1,7 +1,7 @@
 # Capturas de TUKAN
 
 <video controls>
-  <source src="tukan.webm" >
+  <source src="https://orquidealucinada.net/pelis/tukan.webm" >
   Tu navegador no soporta la etiqueta de video.
 </video>
 
