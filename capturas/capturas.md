@@ -1,6 +1,9 @@
 # Capturas de TUKAN
 
 ## 🎥 Demo en video
+## Demo
+
+https://github.com/danielhb2/TUKAN/blob/main/capturas/tukan.webm
 
 🎥[Ver TUKAN en acción](https://orquidealucinada.net/pelis/tukan.webm)
 
