@@ -32,39 +32,39 @@ note_actions_menu() {
         fzf "${FZF_OPTS[@]}" \
             "${FZF_PREVIEW_OPTS[@]}" \
             --prompt="Acciones > " \
-            --preview="
+            --preview='
                 ACTION={}
-                FILENAME=\$(basename '$note')
-                RELDIR=\$(get_relative_dir '$note')
-                CREATEDATE=\$(get_creation_date '$note')
-                MODDATE=\$(get_mod_date '$note')
-                TITLE=\$(get_title '$note' | sed 's/://g')
-                FILESIZE=$(get_file_size "'$TUKAN_DIR'/$NOTE")
+                FILENAME=$(basename "'"$note"'")
+                RELDIR=$(get_relative_dir "'"$note"'")
+                CREATEDATE=$(get_creation_date "'"$note"'")
+                MODDATE=$(get_mod_date "'"$note"'")
+                TITLE=$(get_title "'"$note"'" | sed "s/://g")
+                FILESIZE=$(get_file_size "'"$note"'")
                 # Extraer hashtags
-                HASHTAGS=\$(sed -n \"2p\" '$note' | grep -o \"#[[:alnum:]_-]\+\" | tr \"\n\" \" \" | sed \"s/[[:space:]]*\$//\")
-                if [[ -z \"\$HASHTAGS\" ]]; then
-                    HASHTAGS_DISPLAY=\"\e[2mSin etiquetas\e[0m\"
+                HASHTAGS=$(sed -n "2p" "'"$note"'" | grep -o "#[[:alnum:]_-]\+" | tr "\n" " " | sed "s/[[:space:]]*$//")
+                if [[ -z "$HASHTAGS" ]]; then
+                    HASHTAGS_DISPLAY="\e[2mSin etiquetas\e[0m"
                 else
-                    HASHTAGS_DISPLAY=\"\e[1;35m\$HASHTAGS\e[0m\"
+                    HASHTAGS_DISPLAY="\e[1;35m$HASHTAGS\e[0m"
                 fi
 
-                echo -e \"\e[1;36m┌────────────────────────── METADATA ─────────────────────────┐\e[0m\"
-                echo -e \"\e[1;36m│\e[0m \e[1m\$FILENAME\e[0m\"
-                echo -e \"\e[1;36m│\e[0m \e[2m\$RELDIR\e[0m\"
-                echo -e \"\e[1;36m│\e[0m \e[2mCreación: \$CREATEDATE\e[0m\"
-                echo -e \"\e[1;36m│\e[0m \e[2mModificación: \$MODDATE\e[0m\"
+                echo -e "\e[1;36m┌────────────────────────── METADATA ──────────────────────────┐\e[0m"
+                echo -e "\e[1;36m│\e[0m \e[1m$FILENAME\e[0m"
+                echo -e "\e[1;36m│\e[0m \e[2m$RELDIR\e[0m"
+                echo -e "\e[1;36m│\e[0m \e[2mCreación: $CREATEDATE\e[0m"
+                echo -e "\e[1;36m│\e[0m \e[2mModificación: $MODDATE\e[0m"
                 echo -e "\e[1;36m│\e[0m \e[2mTamaño: $FILESIZE\e[0m"
-                echo -e \"\e[1;36m│\e[0m Etiquetas: \$HASHTAGS_DISPLAY\"
-                echo -e \"\e[1;36m└─────────────────────────────────────────────────────────────┘\e[0m\"
+                echo -e "\e[1;36m│\e[0m Etiquetas: $HASHTAGS_DISPLAY"
+                echo -e "\e[1;36m└──────────────────────────────────────────────────────────────┘\e[0m"
                 echo
-                echo -e \"\e[1;33m▶ Acción: \$ACTION\e[0m\"
+                echo -e "\e[1;33m▶ Acción: $ACTION\e[0m"
                 echo
-                echo -e \"\e[1;35m═══ Título ═══\e[0m\"
-                echo -e \"\e[1m\$TITLE\e[0m\" | $VISOR
+                echo -e "\e[1;35m═══ Título ═══\e[0m"
+                echo -e "\e[1m$TITLE\e[0m" | '"$VISOR"'
                 echo
-                echo -e \"\e[1;35m═══ Contenido ═══\e[0m\"
-                sed '1{/^#!/ { n; n; d; }; d; }; /^#[[:alnum:]_-]/{/^#[^!]/d}' '$note' | $VISOR
-            ")
+                echo -e "\e[1;35m═══ Contenido ═══\e[0m"
+                sed "1{/^#!/ { n; n; d; }; d; }; /^#[[:alnum:]_-]/{/^#[^!]/d}" "'"$note"'" | '"$VISOR"'
+            ')
     
     case "$selected" in
         "Editar")
