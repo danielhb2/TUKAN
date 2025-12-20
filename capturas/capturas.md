@@ -2,7 +2,7 @@
 
 ## 🎥 Demo en video
 
-[Ver video de TUKAN](https://orquidealucinada.net/pelis/tukan.webm)
+🎥[Ver TUKAN en acción](https://orquidealucinada.net/pelis/tukan.webm)
 
 
 
