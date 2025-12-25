@@ -95,9 +95,16 @@ get_filename() {
 
 # Obtener directorio relativo
 get_relative_dir() {
-    local dir
-    dir=$(dirname "$1")
-    [[ "$dir" == "." ]] && echo "Directorio: Base" || echo "Directorio: $dir"
+    local path="$1"
+    
+    # Versión simple para probar
+    local dir=$(basename "$(dirname "$path")")
+    
+    if [[ "$dir" == "." || "$dir" == ".TUKAN" ]]; then
+        echo "Directorio: Base"
+    else
+        echo "Directorio: $dir"
+    fi
 }
 
 # Obtener fecha de modificación (optimizado)
