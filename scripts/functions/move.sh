@@ -63,48 +63,48 @@ move_note() {
 move_notes_menu() {
     local note_data
     note_data=$(list_all_notes | while read -r note; do
-        echo "$(get_title "$TUKAN_DIR/$note" | sed "s/://g"):$note"
+        echo "$(basename "$note")|$(get_title "$TUKAN_DIR/$note" | sed "s/://g")|$note"
     done | 
         fzf "${FZF_OPTS[@]}" \
             "${FZF_PREVIEW_OPTS[@]}" \
             $(list_order) \
+            --delimiter='|' \
+            --with-nth=1 \
             --prompt="$(render_icon '📦') Seleccionar nota a mover > " \
             --preview='
-                IFS=":" read -r TITLE NOTE <<< {}
-                FILENAME=$(basename "$NOTE")
-                RELDIR=$(get_relative_dir "$NOTE")
-                FILESIZE=$(get_file_size "'$TUKAN_DIR'/$NOTE")
+                IFS="|" read -r BASENAME TITLE FULLNOTE <<< {}
+                FILENAME="$BASENAME"
+                RELDIR=$(get_relative_dir "'$TUKAN_DIR'/$FULLNOTE")
+                FILESIZE=$(get_file_size "'$TUKAN_DIR'/$FULLNOTE")
+                CREATEDATE=$(get_creation_date "'$TUKAN_DIR'/$FULLNOTE")
+                MODDATE=$(get_mod_date "'$TUKAN_DIR'/$FULLNOTE")
+                
 # Extraer hashtags
-HASHTAGS=$(sed -n "2p" "'$TUKAN_DIR'/$NOTE" | grep -o "#[[:alnum:]_-]\+" | tr "\n" " " | sed "s/[[:space:]]*$//")
+HASHTAGS=$(sed -n "2p" "'$TUKAN_DIR'/$FULLNOTE" | grep -o "#[[:alnum:]_-]\+" | tr "\n" " " | sed "s/[[:space:]]*$//")
 if [[ -z "$HASHTAGS" ]]; then
     HASHTAGS_DISPLAY="\e[2mSin etiquetas\e[0m"
 else
     HASHTAGS_DISPLAY="\e[1;35m$HASHTAGS\e[0m"
 fi
 
-echo -e "\e[1;36m┌────────────────────────── METADATA ─────────────────────────┐\e[0m"
+echo -e "\e[1;36m┌──────────────────────── METADATA ────────────────────────┐\e[0m"
 echo -e "\e[1;36m│\e[0m \e[1m$FILENAME\e[0m"
 echo -e "\e[1;36m│\e[0m \e[2m$RELDIR\e[0m"
 echo -e "\e[1;36m│\e[0m \e[2mCreación: $CREATEDATE\e[0m"
 echo -e "\e[1;36m│\e[0m \e[2mModificación: $MODDATE\e[0m"
 echo -e "\e[1;36m│\e[0m \e[2mTamaño: $FILESIZE\e[0m"
 echo -e "\e[1;36m│\e[0m Etiquetas: $HASHTAGS_DISPLAY"
-echo -e "\e[1;36m└─────────────────────────────────────────────────────────────┘\e[0m"
+echo -e "\e[1;36m└─────────────────────────────────────────────────────────┘\e[0m"
 echo
 echo -e "\e[1;35m═══ Título ═══\e[0m"
 echo -e "\e[1m$TITLE\e[0m" | view_content
 echo
 echo -e "\e[1;35m═══ Contenido ═══\e[0m"
-sed "1{/^#!/ { n; n; d; }; d; }; /^#[[:alnum:]_-]/{/^#[^!]/d}" "'$TUKAN_DIR'/$NOTE" | view_content
+sed "1{/^#!/ { n; n; d; }; d; }; /^#[[:alnum:]_-]/{/^#[^!]/d}" "'$TUKAN_DIR'/$FULLNOTE" | view_content
             ')
     
     if [[ -n "$note_data" ]]; then
-        IFS=":" read -r title note <<< "$note_data"
-        move_note "$TUKAN_DIR/$note"
+        IFS="|" read -r basename title fullnote <<< "$note_data"
+        move_note "$TUKAN_DIR/$fullnote"
     fi
 }
-
-# ============================================================================
-# FUNCIÓN: MOSTRAR ESTADÍSTICAS (Original con todas las opciones)
-# ============================================================================
-
