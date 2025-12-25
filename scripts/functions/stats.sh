@@ -128,18 +128,20 @@ view_notes_by_date() {
                     time_stamp=$(stat -c %Y "$note_path" 2>/dev/null || stat -f %m "$note_path" 2>/dev/null)
                 fi
                 
+                local basename_only
+                basename_only=$(basename "$note")
                 local title
                 title=$(get_title "$note_path" | sed "s/://g")
-                echo "$time_stamp:$title:$note" >> "$temp_file"
+                echo "$time_stamp|$basename_only|$title|$note" >> "$temp_file"
             done < <(find "$dir_path" -maxdepth 1 -type f -name "*.$TEXT_FORMAT" -print0 2>/dev/null)
         fi
     done
     
     # Ordenar según criterio
     if [[ "$sort_order" == "newest" ]]; then
-        sort -t: -k1 -rn "$temp_file" | cut -d: -f2- > "$sorted_file"
+        sort -t'|' -k1 -rn "$temp_file" | cut -d'|' -f2- > "$sorted_file"
     else
-        sort -t: -k1 -n "$temp_file" | cut -d: -f2- > "$sorted_file"
+        sort -t'|' -k1 -n "$temp_file" | cut -d'|' -f2- > "$sorted_file"
     fi
     
     local total_notes
@@ -156,17 +158,20 @@ view_notes_by_date() {
         note_data=$(cat "$sorted_file" | 
             fzf "${FZF_OPTS[@]}" \
                 "${FZF_PREVIEW_OPTS[@]}" \
+                --delimiter='|' \
+                --with-nth=1 \
                 --border-label="TUKAN - $total_notes notas por $sort_label" \
                 --prompt="$(render_icon '⏱') Ver > " \
                 --preview='
-                    IFS=":" read -r TITLE NOTE <<< {}
-                    FILENAME=$(basename "$NOTE")
-                    RELDIR=$(get_relative_dir "$NOTE")
-                    CREATEDATE=$(get_creation_date "'$TUKAN_DIR'/$NOTE")
-                    MODDATE=$(get_mod_date "'$TUKAN_DIR'/$NOTE")
-                    FILESIZE=$(get_file_size "'$TUKAN_DIR'/$NOTE")
-                    # Extraer hashtags
-                    HASHTAGS=$(sed -n "2p" "'$TUKAN_DIR'/$NOTE" | grep -o "#[[:alnum:]_-]\+" | tr "\n" " " | sed "s/[[:space:]]*$//")
+                    IFS="|" read -r BASENAME TITLE FULLNOTE <<< {}
+                    FILENAME="$BASENAME"
+                    RELDIR=$(get_relative_dir "'$TUKAN_DIR'/$FULLNOTE")
+                    CREATEDATE=$(get_creation_date "'$TUKAN_DIR'/$FULLNOTE")
+                    MODDATE=$(get_mod_date "'$TUKAN_DIR'/$FULLNOTE")
+                    FILESIZE=$(get_file_size "'$TUKAN_DIR'/$FULLNOTE")
+                    
+# Extraer hashtags
+HASHTAGS=$(sed -n "2p" "'$TUKAN_DIR'/$FULLNOTE" | grep -o "#[[:alnum:]_-]\+" | tr "\n" " " | sed "s/[[:space:]]*$//")
 if [[ -z "$HASHTAGS" ]]; then
     HASHTAGS_DISPLAY="\e[2mSin etiquetas\e[0m"
 else
@@ -186,49 +191,52 @@ echo -e "\e[1;35m═══ Título ═══\e[0m"
 echo -e "\e[1m$TITLE\e[0m" | view_content
 echo
 echo -e "\e[1;35m═══ Contenido ═══\e[0m"
-sed "1{/^#!/ { n; n; d; }; d; }; /^#[[:alnum:]_-]/{/^#[^!]/d}" "'$TUKAN_DIR'/$NOTE" | view_content
+sed "1{/^#!/ { n; n; d; }; d; }; /^#[[:alnum:]_-]/{/^#[^!]/d}" "'$TUKAN_DIR'/$FULLNOTE" | view_content
                 ')
         
         [[ -z "$note_data" ]] && break
         
-        IFS=":" read -r title note <<< "$note_data"
-        note_actions_menu "$TUKAN_DIR/$note"
+        IFS="|" read -r basename title fullnote <<< "$note_data"
+        note_actions_menu "$TUKAN_DIR/$fullnote"
     done
     
     rm -f "$temp_file" "$sorted_file"
 }
 
-# Ver notas por rango de tiempo
+# Ver notas por período
 view_notes_by_timeframe() {
     local days="$1"
+    
+    # Calcular fecha de corte
     local cutoff_time
     cutoff_time=$(date -d "$days days ago" +%s 2>/dev/null || date -v-${days}d +%s 2>/dev/null)
     
-    # Limpiar archivos temporales
     local temp_filtered=$(mktemp)
     local filtered_file=$(mktemp)
     
-    # Recolectar notas filtradas
+    # Recolectar notas modificadas en el período
     for dir in "1-Ideas" "2-En_curso" "3-Terminado" "4-Cancelado" "5-Proyectos_futuros"; do
         local dir_path="$TUKAN_DIR/$dir"
         if [[ -d "$dir_path" ]]; then
-            find "$dir_path" -maxdepth 1 -type f -name "*.$TEXT_FORMAT" -print0 2>/dev/null | 
             while IFS= read -r -d '' note_path; do
                 local mod_time
                 mod_time=$(stat -c %Y "$note_path" 2>/dev/null || stat -f %m "$note_path" 2>/dev/null)
+                
                 if [[ $mod_time -ge $cutoff_time ]]; then
                     local note
                     note=$(echo "$note_path" | sed "s|$TUKAN_DIR/||")
+                    local basename_only
+                    basename_only=$(basename "$note")
                     local title
                     title=$(get_title "$note_path" | sed "s/://g")
-                    echo "$mod_time:$title:$note"
+                    echo "$mod_time|$basename_only|$title|$note" >> "$temp_filtered"
                 fi
-            done >> "$temp_filtered"
+            done < <(find "$dir_path" -maxdepth 1 -type f -name "*.$TEXT_FORMAT" -print0 2>/dev/null)
         fi
     done
     
-    # Ordenar por fecha
-    sort -t: -k1 -rn "$temp_filtered" | cut -d: -f2- > "$filtered_file"
+    # Ordenar por fecha (más reciente primero)
+    sort -t'|' -k1 -rn "$temp_filtered" | cut -d'|' -f2- > "$filtered_file"
     
     local note_count
     note_count=$(wc -l < "$filtered_file" | tr -d ' ')
@@ -248,17 +256,20 @@ view_notes_by_timeframe() {
         note_data=$(cat "$filtered_file" | 
             fzf "${FZF_OPTS[@]}" \
                 "${FZF_PREVIEW_OPTS[@]}" \
+                --delimiter='|' \
+                --with-nth=1 \
                 --border-label="TUKAN - Últimos $days días ($note_count notas)" \
                 --prompt="$(render_icon '📅') Ver > " \
                 --preview='
-                    IFS=":" read -r TITLE NOTE <<< {}
-                    FILENAME=$(basename "$NOTE")
-                    RELDIR=$(get_relative_dir "$NOTE")
-                    CREATEDATE=$(get_creation_date "'$TUKAN_DIR'/$NOTE")
-                    MODDATE=$(get_mod_date "'$TUKAN_DIR'/$NOTE")
-                    FILESIZE=$(get_file_size "'$TUKAN_DIR'/$NOTE")
+                    IFS="|" read -r BASENAME TITLE FULLNOTE <<< {}
+                    FILENAME="$BASENAME"
+                    RELDIR=$(get_relative_dir "'$TUKAN_DIR'/$FULLNOTE")
+                    CREATEDATE=$(get_creation_date "'$TUKAN_DIR'/$FULLNOTE")
+                    MODDATE=$(get_mod_date "'$TUKAN_DIR'/$FULLNOTE")
+                    FILESIZE=$(get_file_size "'$TUKAN_DIR'/$FULLNOTE")
+                    
 # Extraer hashtags
-HASHTAGS=$(sed -n "2p" "'$TUKAN_DIR'/$NOTE" | grep -o "#[[:alnum:]_-]\+" | tr "\n" " " | sed "s/[[:space:]]*$//")
+HASHTAGS=$(sed -n "2p" "'$TUKAN_DIR'/$FULLNOTE" | grep -o "#[[:alnum:]_-]\+" | tr "\n" " " | sed "s/[[:space:]]*$//")
 if [[ -z "$HASHTAGS" ]]; then
     HASHTAGS_DISPLAY="\e[2mSin etiquetas\e[0m"
 else
@@ -278,13 +289,13 @@ echo -e "\e[1;35m═══ Título ═══\e[0m"
 echo -e "\e[1m$TITLE\e[0m" | view_content
 echo
 echo -e "\e[1;35m═══ Contenido ═══\e[0m"
-sed "1{/^#!/ { n; n; d; }; d; }; /^#[[:alnum:]_-]/{/^#[^!]/d}" "'$TUKAN_DIR'/$NOTE" | view_content
+sed "1{/^#!/ { n; n; d; }; d; }; /^#[[:alnum:]_-]/{/^#[^!]/d}" "'$TUKAN_DIR'/$FULLNOTE" | view_content
                 ')
         
         [[ -z "$note_data" ]] && break
         
-        IFS=":" read -r title note <<< "$note_data"
-        note_actions_menu "$TUKAN_DIR/$note"
+        IFS="|" read -r basename title fullnote <<< "$note_data"
+        note_actions_menu "$TUKAN_DIR/$fullnote"
     done
     
     rm -f "$temp_filtered" "$filtered_file"
@@ -306,15 +317,19 @@ show_general_stats() {
                     while read -r note_path; do
                         local note
                         note=$(echo "$note_path" | sed "s|$TUKAN_DIR/||")
+                        local basename_only
+                        basename_only=$(basename "$note")
                         local title
                         title=$(get_title "$note_path" | sed "s/://g")
-                        echo "  $title:$note"
+                        echo "  $basename_only|$title|$note"
                     done
                 fi
             done
         } | fzf "${FZF_OPTS[@]}" \
             --bind "ctrl-x:preview-page-up,ctrl-z:preview-page-down" \
             --bind "ctrl-a:preview-up,ctrl-s:preview-down" \
+            --delimiter='|' \
+            --with-nth=1 \
             --border-label="TUKAN - Estadísticas Generales" \
             --preview-window=right:50%:noinfo:wrap \
             --preview-label=' ESTADÍSTICAS / PREVIEW ' \
@@ -361,15 +376,16 @@ show_general_stats() {
                     printf "\e[1;33m%-30s\e[0m: %3d\n" "Modificadas últimas 24h" "$COUNT_24H"
                 else
                     # Si es un archivo, mostrar su contenido
-                    IFS=":" read -r TITLE NOTE <<< "$LINE"
-                    if [[ -n "$NOTE" ]]; then
-                        FILENAME=$(basename "$NOTE")
-                        RELDIR=$(get_relative_dir "$NOTE")
-                        CREATEDATE=$(get_creation_date "'$TUKAN_DIR'/$NOTE")
-                        MODDATE=$(get_mod_date "'$TUKAN_DIR'/$NOTE")
-                        FILESIZE=$(get_file_size "'$TUKAN_DIR'/$NOTE")
+                    IFS="|" read -r BASENAME TITLE FULLNOTE <<< "$LINE"
+                    if [[ -n "$FULLNOTE" ]]; then
+                        FILENAME="$BASENAME"
+                        RELDIR=$(get_relative_dir "'$TUKAN_DIR'/$FULLNOTE")
+                        CREATEDATE=$(get_creation_date "'$TUKAN_DIR'/$FULLNOTE")
+                        MODDATE=$(get_mod_date "'$TUKAN_DIR'/$FULLNOTE")
+                        FILESIZE=$(get_file_size "'$TUKAN_DIR'/$FULLNOTE")
+                        
 # Extraer hashtags
-HASHTAGS=$(sed -n "2p" "'$TUKAN_DIR'/$NOTE" | grep -o "#[[:alnum:]_-]\+" | tr "\n" " " | sed "s/[[:space:]]*$//")
+HASHTAGS=$(sed -n "2p" "'$TUKAN_DIR'/$FULLNOTE" | grep -o "#[[:alnum:]_-]\+" | tr "\n" " " | sed "s/[[:space:]]*$//")
 if [[ -z "$HASHTAGS" ]]; then
     HASHTAGS_DISPLAY="\e[2mSin etiquetas\e[0m"
 else
@@ -389,7 +405,7 @@ echo -e "\e[1;35m═══ Título ═══\e[0m"
 echo -e "\e[1m$TITLE\e[0m" | view_content
 echo
 echo -e "\e[1;35m═══ Contenido ═══\e[0m"
-sed "1{/^#!/ { n; d; }; d; }" "'$TUKAN_DIR'/$NOTE" | view_content
+sed "1{/^#!/ { n; n; d; }; d; }; /^#[[:alnum:]_-]/{/^#[^!]/d}" "'$TUKAN_DIR'/$FULLNOTE" | view_content
 
                     fi
                 fi
@@ -402,15 +418,9 @@ sed "1{/^#!/ { n; d; }; d; }" "'$TUKAN_DIR'/$NOTE" | view_content
         [[ "$selected" == "=="* ]] || [[ "$selected" == "──"* ]] && continue
         
         # Si es un archivo, llamar al menú de acciones
-        IFS=":" read -r title note <<< "$selected"
-        if [[ -n "$note" ]]; then
-            note_actions_menu "$TUKAN_DIR/$note"
+        IFS="|" read -r basename title fullnote <<< "$selected"
+        if [[ -n "$fullnote" ]]; then
+            note_actions_menu "$TUKAN_DIR/$fullnote"
         fi
     done
 }
-
-
-# ============================================================================
-# FUNCIÓN: MOSTRAR AYUDA (Original con menú de temas)
-# ============================================================================
-
