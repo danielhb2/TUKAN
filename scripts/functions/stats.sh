@@ -41,7 +41,7 @@ show_statistics() {
                 "${FZF_PREVIEW_OPTS[@]}" \
                 --prompt="$(render_icon '📊') Estadísticas > " \
                 --preview='
-                    for DIR in "1-Ideas" "2-En_curso" "3-Terminado" "4-Cancelado" "5-Proyectos_futuros"; do
+                    for DIR in "1-Ideas" "2-En_curso" "3-Terminado" "4-Cancelado" "5-Proyectos_futuros" "6-Notas_varias"; do
                         DIR_PATH="'$TUKAN_DIR'/$DIR"
                         if [[ -d "$DIR_PATH" ]]; then
                             NOTE_COUNT=$(find "$DIR_PATH" -maxdepth 1 -type f -name "*.'$TEXT_FORMAT'" 2>/dev/null | wc -l)
@@ -107,7 +107,7 @@ view_notes_by_date() {
     local sorted_file=$(mktemp)
     
     # Recolectar TODAS las notas de TODOS los directorios
-    for dir in "1-Ideas" "2-En_curso" "3-Terminado" "4-Cancelado" "5-Proyectos_futuros"; do
+    for dir in "1-Ideas" "2-En_curso" "3-Terminado" "4-Cancelado" "5-Proyectos_futuros" "6-Notas_varias"; do
         local dir_path="$TUKAN_DIR/$dir"
         if [[ -d "$dir_path" ]]; then
             while IFS= read -r -d '' note_path; do
@@ -215,7 +215,7 @@ view_notes_by_timeframe() {
     local filtered_file=$(mktemp)
     
     # Recolectar notas modificadas en el período
-    for dir in "1-Ideas" "2-En_curso" "3-Terminado" "4-Cancelado" "5-Proyectos_futuros"; do
+    for dir in "1-Ideas" "2-En_curso" "3-Terminado" "4-Cancelado" "5-Proyectos_futuros" "6-Notas_varias"; do
         local dir_path="$TUKAN_DIR/$dir"
         if [[ -d "$dir_path" ]]; then
             while IFS= read -r -d '' note_path; do
@@ -307,7 +307,7 @@ show_general_stats() {
         local selected
         selected=$({
             echo "========== ESTADÍSTICAS GENERALES =========="
-            for dir in "1-Ideas" "2-En_curso" "3-Terminado" "4-Cancelado" "5-Proyectos_futuros"; do
+            for dir in "1-Ideas" "2-En_curso" "3-Terminado" "4-Cancelado" "5-Proyectos_futuros" "6-Notas_varias"; do
                 local dir_path="$TUKAN_DIR/$dir"
                 if [[ -d "$dir_path" ]]; then
                     local display_name
@@ -344,7 +344,7 @@ show_general_stats() {
                     echo
                     
                     TOTAL=0
-                    for DIR in "1-Ideas" "2-En_curso" "3-Terminado" "4-Cancelado" "5-Proyectos_futuros"; do
+                    for DIR in "1-Ideas" "2-En_curso" "3-Terminado" "4-Cancelado" "5-Proyectos_futuros" "6-Notas_varias"; do
                         DIR_PATH="'$TUKAN_DIR'/$DIR"
                         COUNT=$(find "$DIR_PATH" -maxdepth 1 -type f -name "*.'$TEXT_FORMAT'" 2>/dev/null | wc -l | tr -d " ")
                         DISPLAY_NAME=$(echo "$DIR" | sed "s/^[0-9]-//" | tr "_" " ")
@@ -359,7 +359,7 @@ show_general_stats() {
                     # Contar notas de últimas 24 horas
                     CUTOFF_24H=$(date -d "1 day ago" +%s 2>/dev/null || date -v-1d +%s 2>/dev/null)
                     COUNT_24H=0
-                    for DIR in "1-Ideas" "2-En_curso" "3-Terminado" "4-Cancelado" "5-Proyectos_futuros"; do
+                    for DIR in "1-Ideas" "2-En_curso" "3-Terminado" "4-Cancelado" "5-Proyectos_futuros" "6-Notas_varias"; do
                         DIR_PATH="'$TUKAN_DIR'/$DIR"
                         if [[ -d "$DIR_PATH" ]]; then
                             while read -r NOTE; do

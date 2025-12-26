@@ -92,7 +92,7 @@ export VISOR
 export VISOR_STYLE
 
 # Directorios de Kanban
-readonly KANBAN_DIRS=("1-Ideas" "2-En_curso" "3-Terminado" "4-Cancelado" "5-Proyectos_futuros" "Basurero")
+readonly KANBAN_DIRS=("1-Ideas" "2-En_curso" "3-Terminado" "4-Cancelado" "5-Proyectos_futuros" "Basurero" "6-Notas_varias")
 
 # ============================================================================
 # COLORES FZF (desde configuración)
@@ -200,7 +200,7 @@ init_directories
 show_menu() {
     while true; do
         local option
-        option=$(echo -e "$(render_icon '📕') Nueva\n$(render_icon '📖') Abrir\n$(render_icon '🏷') Etiquetas\n$(render_icon '🔎') Buscar\n$(render_icon '📁') Directorios\n$(render_icon '📦') Mover\n$(render_icon '📊') Estadísticas\n$(render_icon '❓') Ayuda\n$(render_icon '🔥') Borrar\n$(render_icon '💎') Salir" | 
+        option=$(echo -e "$(render_icon '📕') Nueva\n$(render_icon '📖') Abrir\n$(render_icon '🏷')  Etiquetas\n$(render_icon '🔎') Buscar\n$(render_icon '📁') Directorios\n$(render_icon '📦') Mover\n$(render_icon '📊') Estadísticas\n$(render_icon '❓') Ayuda\n$(render_icon '🔥') Borrar\n$(render_icon '💎') Salir" | 
             fzf "${FZF_OPTS[@]}" \
                 "${FZF_PREVIEW_OPTS[@]}" \
                 --prompt="Menú Principal > " \
@@ -303,7 +303,9 @@ EOF
             *"Salir"*) break ;;
         esac
     done
-clear ; tput setaf 2 bold ; echo "Gracias por usar TUKAN" ; echo -e "\e[1;35m   💎 Hasta pronto \e[0m"
+clear # Para una depuración básica comente esta línea
+
+tput setaf 2 bold ; echo "Gracias por usar TUKAN" ; echo -e "\e[1;35m   💎 Hasta pronto \e[0m"
 }
 
 # ============================================================================

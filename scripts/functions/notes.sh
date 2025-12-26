@@ -99,7 +99,7 @@ echo -e "\e[1;36m│\e[0m \e[2mCreación: $CREATEDATE\e[0m"
 echo -e "\e[1;36m│\e[0m \e[2mModificación: $MODDATE\e[0m"
 echo -e "\e[1;36m│\e[0m \e[2mTamaño: $FILESIZE\e[0m"
 echo -e "\e[1;36m│\e[0m Etiquetas: $HASHTAGS_DISPLAY"
-echo -e "\e[1;36m└─────────────────────────────────────────────────────────┘\e[0m"
+echo -e "\e[1;36m└──────────────────────────────────────────────────────────┘\e[0m"
 echo
 echo -e "\e[1;35m═══ Título ═══\e[0m"
 echo -e "\e[1m$TITLE\e[0m" | view_content
