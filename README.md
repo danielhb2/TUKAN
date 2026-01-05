@@ -1829,7 +1829,8 @@ TUKAN **hereda y extiende** el código base de Fuzpad, agregando:
 Tanto Fuzpad como TUKAN están licenciados bajo **GPL-3.0**.
 
 **Créditos originales:** [JianZcar](https://github.com/JianZcar/)  
-**Desarrollo y extensiones:** [Daniel Horacio Braga]
+**Definición funcional, diseño de flujo y validación:** [Daniel Horacio Braga]
+**Implementación técnica:** basada en Fuzpad (JianZcar) con asistencia de IA (ChatGPT y Claude)
 
 ---
 
@@ -1877,9 +1878,15 @@ TUKAN es una extensión modular de **[Fuzpad](https://github.com/JianZcar/FuzPad
 - ✨ Archivo de configuración
 - ✨ Temas de colores
 
-### Desarrollado por
-[Daniel Horacio Braga] - 2025  
-Apoyo fundamental de ChatGPT y Claude.ai
+### Rol y créditos
+
+Idea, definición funcional, diseño de flujo y validación de uso:
+Daniel Horacio Braga
+
+Implementación técnica:
+Basada en Fuzpad (JianZcar), con asistencia de herramientas de IA (ChatGPT y Claude.ai)
+
+Año: 2025
 
 ### Tecnologías
 - `bash` - Shell scripting
