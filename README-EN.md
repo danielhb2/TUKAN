@@ -1709,7 +1709,8 @@ Suggestions welcome:
 Both Fuzpad and TUKAN are licensed under **GPL-3.0**.
 
 **Original Credits:** [JianZcar](https://github.com/JianZcar/)  
-**Development and Extensions:** [Daniel Horacio Braga] and the invaluable help of ChatGpt and Calude.ai
+**Functional Definition, Flow Design, and Validation:** [Daniel Horacio Braga]  
+**Technical Implementation:** based on Fuzpad (JianZcar) with AI assistance (ChatGPT and Claude)
 
 TUKAN is free software licensed under **GNU General Public License v3.0**.
 
@@ -1750,8 +1751,15 @@ TUKAN is a modular extension of **[Fuzpad](https://github.com/JianZcar/FuzPad)**
 - ✨ Multiple color themes  
 - ✨ File size display
 
-### Developed by
-Daniel Horacio Braga - 2025
+### Role and Credits
+
+Idea, functional definition, flow design, and usability validation:  
+Daniel Horacio Braga
+
+Technical implementation:  
+Based on Fuzpad (JianZcar), with assistance from AI tools (ChatGPT and Claude.ai)
+
+Year: 2025
 
 ### Technologies
 - `bash` - Shell scripting  
