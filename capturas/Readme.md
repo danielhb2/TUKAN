@@ -3,6 +3,9 @@
 ## 🎥 Demo en video
 
 🎬 [Ver TUKAN en acción](https://orquidealucinada.net/pelis/tukan.webm)
+<video width="49%" controls>
+  <source src="https://orquidealucinada.net/pelis/tukan.webm" type="video/webm">
+</video>
 
 ## Capturas
 
